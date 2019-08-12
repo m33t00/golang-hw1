@@ -5,16 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"strings"
 )
-
-func pathDepth(path string) int {
-	return len(strings.Split(path, string(os.PathSeparator))) - 1
-}
-
-func newRoot(oldRoot string, newRoot string) string {
-	return oldRoot + string(os.PathSeparator) + newRoot
-}
 
 func removeFilesFromList(list []os.FileInfo) []os.FileInfo {
 	filtered := make([]os.FileInfo, 0, len(list))
@@ -68,7 +59,11 @@ func processPath(out io.Writer, root string, showFiles bool, globalPrefix string
 		fmt.Fprintf(out, "%v%v\n", globalPrefix+elementPrefix, leafName)
 
 		if fileInfo.IsDir() {
-			processPath(out, newRoot(root, fileInfo.Name()), showFiles, globalPrefix+elementIdent)
+			processPath(
+				out,
+				root+string(os.PathSeparator)+fileInfo.Name(),
+				showFiles,
+				globalPrefix+elementIdent)
 		}
 	}
 
