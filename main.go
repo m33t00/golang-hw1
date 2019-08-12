@@ -20,7 +20,21 @@ func removeFilesFromList(list []os.FileInfo) []os.FileInfo {
 	return filtered
 }
 
-func processPath(out io.Writer, root string, showFiles bool, globalPrefix string) {
+func getNodeName(fileInfo os.FileInfo) string {
+	fileSize := "empty"
+
+	if fileInfo.IsDir() {
+		return fileInfo.Name()
+	}
+
+	if fileInfo.Size() != 0 {
+		fileSize = fmt.Sprintf("%db", fileInfo.Size())
+	}
+
+	return fmt.Sprintf("%v (%v)", fileInfo.Name(), fileSize)
+}
+
+func processPath(out io.Writer, root string, showFiles bool, linePrefix string) {
 	const (
 		voidIdent = "	"
 		ident     = "│	"
@@ -28,7 +42,7 @@ func processPath(out io.Writer, root string, showFiles bool, globalPrefix string
 		deadend   = "└───"
 	)
 
-	var elementPrefix, elementIdent, leafName, fileSize string
+	var elementPrefix, nextLineIdentation string
 
 	list, _ := ioutil.ReadDir(root)
 
@@ -39,31 +53,20 @@ func processPath(out io.Writer, root string, showFiles bool, globalPrefix string
 	for idx, fileInfo := range list {
 		if idx < len(list)-1 {
 			elementPrefix = leaf
-			elementIdent = ident
+			nextLineIdentation = ident
 		} else {
 			elementPrefix = deadend
-			elementIdent = voidIdent
+			nextLineIdentation = voidIdent
 		}
 
-		if !fileInfo.IsDir() {
-			if fileInfo.Size() == 0 {
-				fileSize = "empty"
-			} else {
-				fileSize = fmt.Sprintf("%db", fileInfo.Size())
-			}
-			leafName = fmt.Sprintf("%v (%v)", fileInfo.Name(), fileSize)
-		} else {
-			leafName = fileInfo.Name()
-		}
-
-		fmt.Fprintf(out, "%v%v\n", globalPrefix+elementPrefix, leafName)
+		fmt.Fprintf(out, "%v%v\n", linePrefix+elementPrefix, getNodeName(fileInfo))
 
 		if fileInfo.IsDir() {
 			processPath(
 				out,
 				root+string(os.PathSeparator)+fileInfo.Name(),
 				showFiles,
-				globalPrefix+elementIdent)
+				linePrefix+nextLineIdentation)
 		}
 	}
 
