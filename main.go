@@ -36,8 +36,8 @@ func getNodeName(fileInfo os.FileInfo) string {
 
 func processPath(out io.Writer, root string, showFiles bool, linePrefix string) {
 	const (
-		voidIdent = "	"
-		ident     = "│	"
+		voidIdent = "\t"
+		ident     = "│\t"
 		leaf      = "├───"
 		deadend   = "└───"
 	)
@@ -52,11 +52,9 @@ func processPath(out io.Writer, root string, showFiles bool, linePrefix string) 
 
 	for idx, fileInfo := range list {
 		if idx < len(list)-1 {
-			elementPrefix = leaf
-			nextLineIdentation = ident
+			elementPrefix, nextLineIdentation = leaf, ident
 		} else {
-			elementPrefix = deadend
-			nextLineIdentation = voidIdent
+			elementPrefix, nextLineIdentation = deadend, voidIdent
 		}
 
 		fmt.Fprintf(out, "%v%v\n", linePrefix+elementPrefix, getNodeName(fileInfo))
