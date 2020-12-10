@@ -34,15 +34,15 @@ func getNodeName(fileInfo os.FileInfo) string {
 	return fmt.Sprintf("%v (%v)", fileInfo.Name(), fileSize)
 }
 
-func processPath(out io.Writer, root string, showFiles bool, linePrefix string) {
+func processPath(out io.Writer, root string, showFiles bool, linePrefix string) string {
 	const (
-		voidIdent = "\t"
-		ident     = "│\t"
-		leaf      = "├───"
-		deadend   = "└───"
+		voidIndent = "\t"
+		indent     = "│\t"
+		leaf      = "├─── "
+		deadend   = "└─── "
 	)
 
-	var elementPrefix, nextLineIdentation string
+	var elementPrefix, nextLineIndentation, output string
 
 	list, _ := ioutil.ReadDir(root)
 
@@ -52,27 +52,27 @@ func processPath(out io.Writer, root string, showFiles bool, linePrefix string) 
 
 	for idx, fileInfo := range list {
 		if idx < len(list)-1 {
-			elementPrefix, nextLineIdentation = leaf, ident
+			elementPrefix, nextLineIndentation = leaf, indent
 		} else {
-			elementPrefix, nextLineIdentation = deadend, voidIdent
+			elementPrefix, nextLineIndentation = deadend, voidIndent
 		}
 
-		fmt.Fprintf(out, "%v%v\n", linePrefix+elementPrefix, getNodeName(fileInfo))
+		output = fmt.Sprintf("%s%v%v\n", output, linePrefix+elementPrefix, getNodeName(fileInfo))
 
 		if fileInfo.IsDir() {
-			processPath(
+			output += processPath(
 				out,
 				root+string(os.PathSeparator)+fileInfo.Name(),
 				showFiles,
-				linePrefix+nextLineIdentation)
+				linePrefix+nextLineIndentation)
 		}
 	}
 
-	return
+	return output
 }
 
 func dirTree(out io.Writer, root string, showFiles bool) error {
-	processPath(out, root, showFiles, "")
+	fmt.Println(processPath(out, root, showFiles, ""))
 
 	return nil
 }
