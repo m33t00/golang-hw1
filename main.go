@@ -38,8 +38,8 @@ func processPath(out io.Writer, root string, showFiles bool, linePrefix string) 
 	const (
 		voidIndent = "\t"
 		indent     = "│\t"
-		leaf      = "├─── "
-		deadend   = "└─── "
+		leaf      = "├───"
+		deadend   = "└───"
 	)
 
 	var elementPrefix, nextLineIndentation, output string
@@ -72,7 +72,7 @@ func processPath(out io.Writer, root string, showFiles bool, linePrefix string) 
 }
 
 func dirTree(out io.Writer, root string, showFiles bool) error {
-	fmt.Println(processPath(out, root, showFiles, ""))
+	out.Write([]byte(processPath(out, root, showFiles, "")))
 
 	return nil
 }
